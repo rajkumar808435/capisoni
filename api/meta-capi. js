@@ -1,0 +1,103 @@
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({error:'Method not allowed'});
+  }
+
+  const pixel = process.env.META_PIXEL_ID;
+  const token = process.env.META_CAPI_ACCESS_TOKEN;
+  const version = process.env.META_GRAPH_API_VERSION;
+  const domains = (process.env.META_ALLOWED_ORIGINS || '')
+    .split(',').map(x => x.trim()).filter(Boolean);
+
+  if (!pixel || !token || !version || !domains.length) {
+    return res.status(500).json({error:'Configuration missing'});
+  }
+
+  const origin = req.headers.origin;
+
+  if (!origin || !domains.includes(origin)) {
+    return res.status(403).json({error:'Domain not allowed'});
+  }
+
+  try {
+    const body = typeof req.body === 'string'
+      ? JSON.parse(req.body) : req.body;
+
+    const {
+      event_name, event_id, event_source_url, fbp, fbc
+    } = body || {};
+
+    if (
+      !['PageView','Contact'].includes(event_name) ||
+      typeof event_id !== 'string' ||
+      event_id.length < 1 || event_id.length > 200 ||
+      typeof event_source_url !== 'string'
+    ) {
+      return res.status(400).json({error:'Invalid event'});
+    }
+
+    const source = new URL(event_source_url);
+
+    if (source.origin !== origin || !domains.includes(source.origin)) {
+      return res.status(400).json({error:'Invalid source'});
+    }
+
+    const user_data = {
+      client_user_agent: req.headers['user-agent']
+    };
+
+    const ip = req.headers['x-forwarded-for'];
+    if (ip) user_data.client_ip_address = ip.split(',')[0].trim();
+
+    if (typeof fbp === 'string' && fbp.length <= 200) {
+      user_data.fbp = fbp;
+    }
+
+    if (typeof fbc === 'string' && fbc.length <= 500) {
+      user_data.fbc = fbc;
+    }
+
+    const payload = {
+      data: [{
+        event_name,
+        event_time: Math.floor(Date.now()/1000),
+        event_id,
+        action_source: 'website',
+        event_source_url,
+        user_data
+      }]
+    };
+
+    if (process.env.META_TEST_EVENT_CODE) {
+      payload.test_event_code = process.env.META_TEST_EVENT_CODE;
+    }
+
+    const response = await fetch(
+      `https://graph.facebook.com/${version}/${pixel}/events`,
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${token}`
+        },
+        body:JSON.stringify(payload)
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Meta error:',result);
+      return res.status(502).json({error:'Meta rejected event'});
+    }
+
+    return res.status(200).json({
+      success:true,
+      events_received:result.events_received
+    });
+
+  } catch(error) {
+    console.error(error);
+    return res.status(400).json({error:'Invalid request'});
+  }
+}

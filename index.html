@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101a2b">
+<title>All India Services | Personal Assistance</title>
+
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window,document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+
+const PIXEL_ID = '1420640643573189';
+
+fbq('init', PIXEL_ID);
+
+function newEventId() {
+  return crypto.randomUUID();
+}
+
+function cookieValue(name) {
+  const m = document.cookie.match(
+    new RegExp('(?:^|; )' + name + '=([^;]*)')
+  );
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+function sendCAPI(name, id) {
+  return fetch('/api/meta-capi', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    keepalive: true,
+    body: JSON.stringify({
+      event_name: name,
+      event_id: id,
+      event_source_url: location.href,
+      fbp: cookieValue('_fbp'),
+      fbc: cookieValue('_fbc')
+    })
+  }).catch(console.error);
+}
+
+// PAGE VIEW
+const pageId = newEventId();
+fbq('track', 'PageView', {}, {eventID: pageId});
+sendCAPI('PageView', pageId);
+
+// TELEGRAM CONTACT BUTTONS
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.cta').forEach(button => {
+    button.addEventListener('click', () => {
+      const id = newEventId();
+      fbq('track', 'Contact', {}, {eventID: id});
+      sendCAPI('Contact', id);
+    });
+  });
+});
+</script>
+
+<noscript>
+<img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1420640643573189&ev=PageView&noscript=1">
+</noscript>
+
+<style>
+*{box-sizing:border-box}
+body{
+min-height:100vh;margin:0;padding:24px;
+display:grid;place-items:center;overflow:hidden;
+font-family:Arial,Helvetica,sans-serif;color:white;
+background:
+radial-gradient(ellipse at 15% 10%,#263d60 0,transparent 42%),
+radial-gradient(ellipse at 90% 90%,#23344c 0,transparent 38%),
+#101a2b
+}
+.card{
+width:min(100%,470px);padding:42px 34px 30px;
+text-align:center;background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.14);
+border-radius:24px;
+box-shadow:0 24px 75px rgba(0,0,0,.28);
+backdrop-filter:blur(10px)
+}
+.brand{
+width:72px;height:72px;margin:0 auto 22px;
+display:grid;place-items:center;border-radius:22px;
+background:linear-gradient(145deg,#f5d796,#d4a64f);
+color:#182238;font-size:20px;font-weight:800;
+letter-spacing:1px
+}
+.eyebrow{
+margin:0 0 10px;color:#e3c681;
+font-size:11px;font-weight:700;
+letter-spacing:2.2px;text-transform:uppercase
+}
+h1{margin:0;font-size:clamp(29px,7vw,37px);line-height:1.12}
+.intro{
+margin:16px auto 24px;max-width:340px;
+color:#c5cede;font-size:15px;line-height:1.7
+}
+.service{
+margin:0 auto 25px;padding:14px 16px;
+display:flex;align-items:center;justify-content:center;
+gap:10px;border:1px solid rgba(255,255,255,.12);
+border-radius:13px;background:rgba(255,255,255,.045);
+color:#e7ebf2;font-size:13px
+}
+.dot{
+width:8px;height:8px;border-radius:50%;
+background:#e3c681;box-shadow:0 0 12px #e3c681
+}
+.cta{
+display:flex;justify-content:center;align-items:center;
+gap:10px;width:100%;padding:16px 20px;
+border-radius:12px;
+background:linear-gradient(135deg,#f1d18b,#d3a34e);
+color:#172238;text-decoration:none;
+font-size:15px;font-weight:700
+}
+.cta-top{margin-bottom:25px}
+.arrow{font-size:18px}
+footer{margin-top:25px;color:#8d9aaf;font-size:11px}
+@media(max-width:420px){
+.card{padding:34px 23px 26px}
+}
+</style>
+</head>
+
+<body>
+<main class="card">
+<div class="brand">AIS</div>
+<p class="eyebrow">Welcome</p>
+<h1>All India Services</h1>
+
+<p class="intro">
+Looking for information or assistance? Send us a message and we’ll be happy to help.
+</p>
+
+<a class="cta cta-top"
+href="https://t.me/+Rn877thYjEVmMjdl"
+target="_blank" rel="noopener noreferrer">
+<span>Contact us on Telegram</span>
+<span class="arrow">→</span>
+</a>
+
+<div class="service">
+<span class="dot"></span>
+<span>Friendly support for your enquiries</span>
+</div>
+
+<a class="cta"
+href="https://t.me/+Rn877thYjEVmMjdl"
+target="_blank" rel="noopener noreferrer">
+<span>Contact us on Telegram</span>
+<span class="arrow">→</span>
+</a>
+
+<footer>© 2026 All India Services. All rights reserved.</footer>
+</main>
+</body>
+</html>
